@@ -15,9 +15,9 @@ deepspeed llava/train/train_mem.py \
     --bf16 True \
     --output_dir ./checkpoints/llava-MobileLLaMA-1.4B-Chat-pretrain \
     --num_train_epochs 1 \
-    --per_device_train_batch_size 32 \
+    --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 4 \
-    --gradient_accumulation_steps 2 \
+    --gradient_accumulation_steps 8 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 500 \
@@ -29,7 +29,7 @@ deepspeed llava/train/train_mem.py \
     --logging_steps 1 \
     --tf32 True \
     --model_max_length 2048 \
-    --gradient_checkpointing True \
+    --gradient_checkpointing False \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to wandb
