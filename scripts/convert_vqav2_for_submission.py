@@ -18,7 +18,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     src = os.path.join(args.dir, 'answers', args.split, args.ckpt, 'merge.jsonl')
-    test_split = os.path.join(args.dir, 'llava_vqav2_mscoco_test2015.jsonl')
+    test_split = os.path.join(args.dir, 'llava_vqav2_val.jsonl')
     dst = os.path.join(args.dir, 'answers_upload', args.split, f'{args.ckpt}.json')
     os.makedirs(os.path.dirname(dst), exist_ok=True)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
             error_line += 1
 
     results = {x['question_id']: x['text'] for x in results}
-    test_split = [json.loads(line) for line in open(test_split)]
+    test_split = [json.loads(line) for line in open(test_split)][:1000]
     split_ids = set([x['question_id'] for x in test_split])
 
     print(f'total results: {len(results)}, total split: {len(test_split)}, error_line: {error_line}')
