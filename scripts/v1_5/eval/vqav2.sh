@@ -10,6 +10,20 @@ SPLIT="llava_vqav2_val"
 DATASET="vqav2_val"
 CONV="vicuna_v1"
 
+# IDX=0
+# CHUNKS=2
+# python -m llava.eval.model_vqa_loader \
+#     --model-base /data/yingyueli/hub/MobileLLaMA-1.4B-Chat \
+#     --model-path checkpoints/llava-MobileLLaMA-1.4B-Chat-pretrain \
+#     --question-file ./playground/data/eval/vqav2/$SPLIT.jsonl \
+#     --image-folder ./playground/data/eval/vqav2/val2014 \
+#     --answers-file ./playground/data/eval/vqav2/answers/$SPLIT/$CKPT/${CHUNKS}_${IDX}_${CONV}_short.jsonl \
+#     --num-chunks 1 \
+#     --chunk-idx 0 \
+#     --temperature 0 \
+#     --conv-mode vicuna_v1
+
+
 for IDX in $(seq 0 $((CHUNKS-1))); do
     CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python -m llava.eval.model_vqa_loader \
         --model-base /data/yingyueli/hub/MobileLLaMA-1.4B-Chat \
@@ -20,6 +34,8 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
         --num-chunks $CHUNKS \
         --chunk-idx $IDX \
         --temperature 0 \
+        --num_beams 5 \
+        --max_new_tokens 10 \
         --conv-mode $CONV &
 done
 

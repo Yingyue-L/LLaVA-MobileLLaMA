@@ -46,9 +46,18 @@ class CustomDataset(Dataset):
             qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
 
         conv = conv_templates[args.conv_mode].copy()
-        conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
-        prompt = conv.get_prompt()
+        # import pdb; pdb.set_trace()
+        # conv.append_message(conv.roles[0], qs)
+        ques = qs.split('\n')[1]
+
+        conv.append_message(conv.roles[0], f"<image>\n")
+        conv.append_message(conv.roles[1], f"{ques} answer:")
+        # prompt = conv.get_prompt().replace("ASSISTANT:", "ASSISTANT: short answer:")
+        prompt = conv.get_prompt()[:-4]
+        print(prompt)
+        # import pdb; pdb.set_trace()
+
+        # prompt = prompt.replace("\nAnswer the question using a single word or phrase.", "")
 
         image = Image.open(os.path.join(self.image_folder, image_file)).convert('RGB')
         image_tensor = process_images([image], self.image_processor, self.model_config)[0]
@@ -62,7 +71,7 @@ class CustomDataset(Dataset):
 
 
 # DataLoader
-def create_data_loader(questions, image_folder, tokenizer, image_processor, model_config, batch_size=1, num_workers=4):
+def create_data_loader(questions, image_folder, tokenizer, image_processor, model_config, batch_size=1, num_workers=16):
     assert batch_size == 1, "batch_size must be 1"
     dataset = CustomDataset(questions, image_folder, tokenizer, image_processor, model_config)
     data_loader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False)
@@ -76,7 +85,7 @@ def eval_model(args):
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, args.model_base, model_name)
 
-    questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")][:1000]
+    questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]
     questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
@@ -111,6 +120,7 @@ def eval_model(args):
             print(f'[Warning] {n_diff_input_output} output_ids are not the same as the input_ids')
         outputs = tokenizer.batch_decode(output_ids[:, input_token_len:], skip_special_tokens=True)[0]
         outputs = outputs.strip()
+        # print(cur_prompt, outputs)
 
         ans_id = shortuuid.uuid()
         ans_file.write(json.dumps({"question_id": idx,
