@@ -194,7 +194,7 @@ def collate_fn(batches, tokenizer):
 class VQADataset(torch.utils.data.Dataset):
 
     def __init__(self, train, test, prompt, few_shot):
-        self.test = open(test).readlines()[:10]
+        self.test = open(test).readlines()[:1000]
         self.prompt = prompt
 
         self.few_shot = few_shot

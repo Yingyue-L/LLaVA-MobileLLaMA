@@ -49,22 +49,24 @@ def eval_model(args):
             image = Image.open(os.path.join(args.image_folder, image_file))
             image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
             images = image_tensor.unsqueeze(0).half().cuda()
-            if getattr(model.config, 'mm_use_im_start_end', False):
-                qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
-            else:
-                qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+            # if getattr(model.config, 'mm_use_im_start_end', False):
+            #     qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+            # else:
+            #     qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
             cur_prompt = '<image>' + '\n' + cur_prompt
         else:
-            images = None
+            # images = None
+            continue
 
         if args.single_pred_prompt:
             qs = qs + '\n' + "Answer with the option's letter from the given choices directly."
             cur_prompt = cur_prompt + '\n' + "Answer with the option's letter from the given choices directly."
 
         conv = conv_templates[args.conv_mode].copy()
-        conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
-        prompt = conv.get_prompt()
+        conv.append_message(conv.roles[0], '<image>\n')
+        conv.append_message(conv.roles[1], qs + " answer:")
+        prompt = conv.get_prompt()[:-4]
+        print(prompt)
 
         input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 

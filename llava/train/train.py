@@ -35,7 +35,8 @@ from llava.model import *
 from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
-
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 local_rank = None
 
@@ -666,7 +667,10 @@ class LazySupervisedDataset(Dataset):
             image_file = self.list_data_dict[i]['image']
             image_folder = self.data_args.image_folder
             processor = self.data_args.image_processor
-            image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+            try:
+                image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+            except:
+                print(os.path.join(image_folder, image_file))
             if self.data_args.image_aspect_ratio == 'pad':
                 def expand2square(pil_img, background_color):
                     width, height = pil_img.size

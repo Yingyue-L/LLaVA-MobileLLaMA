@@ -58,6 +58,7 @@ if __name__ == "__main__":
         if prob_id not in predictions:
             pred = {'text': 'FAILED', 'prompt': 'Unknown'}
             pred_text = 'FAILED'
+            continue
         else:
             pred = predictions[prob_id]
             pred_text = pred['text']

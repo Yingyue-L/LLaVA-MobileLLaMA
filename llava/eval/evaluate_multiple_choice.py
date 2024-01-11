@@ -146,7 +146,7 @@ if __name__ == '__main__':
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, args.model_base, model_name, device_map="cuda")
 
     model = model.eval()
-    prompt = 'USER: <image>\n ASSISTANT: Context: {}\nQuestion: {}\nOptions: {}\nAnswer:'
+    prompt = 'USER: <image>\n ASSISTANT: Context: {}\nQuestion: {}\nOptions: {}\nAnswer with the option\'s letter from the given choices directly. answer:'
 
     dataset = MultipleChoiceDataste(test=ds_collections[args.dataset]['test'],
                                     prompt=prompt,
@@ -193,12 +193,11 @@ if __name__ == '__main__':
             )
             shift_logits = outputs.logits[..., :-1, :].contiguous()
             shift_labels = labels[..., 1:].contiguous()
-            # Flatten the tokens
-            shift_logits = shift_logits.view(-1, shift_logits.shape[-1])
-            shift_labels = shift_labels.view(-1)
+            # # Flatten the tokens
+            # shift_logits = shift_logits.view(-1, shift_logits.shape[-1])
+            # shift_labels = shift_labels.view(-1)
 
-            losses = torch.nn.functional.cross_entropy(shift_logits, shift_labels,
-                                                       reduction='none').view(outputs.logits.shape[0], -1)
+            losses = torch.nn.functional.cross_entropy(shift_logits.permute(0,2,1), shift_labels,reduction='none')
 
             losses = losses.split(chunk_sizes, dim=0)
             labels = labels.split(chunk_sizes, dim=0)
