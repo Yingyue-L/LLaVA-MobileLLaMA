@@ -31,7 +31,7 @@ if __name__ == '__main__':
             error_line += 1
 
     results = {x['question_id']: x['text'] for x in results}
-    test_split = [json.loads(line) for line in open(test_split)][:1000]
+    test_split = [json.loads(line) for line in open(test_split)]
     split_ids = set([x['question_id'] for x in test_split])
 
     print(f'total results: {len(results)}, total split: {len(test_split)}, error_line: {error_line}')

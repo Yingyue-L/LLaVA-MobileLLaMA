@@ -66,7 +66,7 @@ def eval_model(args):
         conv.append_message(conv.roles[0], '<image>\n')
         conv.append_message(conv.roles[1], qs + " answer:")
         prompt = conv.get_prompt()[:-4]
-        print(prompt)
+        # print(prompt)
 
         input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 

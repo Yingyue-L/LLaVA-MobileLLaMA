@@ -40,26 +40,26 @@ class CustomDataset(Dataset):
         line = self.questions[index]
         image_file = line["image"]
         qs = line["text"]
-        if self.model_config.mm_use_im_start_end:
-            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
-        else:
-            qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+        # if self.model_config.mm_use_im_start_end:
+        #     qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+        # else:
+        #     qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
 
         conv = conv_templates[args.conv_mode].copy()
         # import pdb; pdb.set_trace()
         # conv.append_message(conv.roles[0], qs)
 
         # mobilellama-pretrain
-        # ques = qs.split('\n')[1]
+        # ques = qs.split('\n')[0]
         # conv.append_message(conv.roles[0], f"<image>\n")
         # conv.append_message(conv.roles[1], f"{ques} answer:")
         # # prompt = conv.get_prompt().replace("ASSISTANT:", "ASSISTANT: short answer:")
         # prompt = conv.get_prompt()[:-4]
 
         # mobilellama-fintune 
-        ques = qs.split('\n')[1]
+        ques = qs.split("\nAnswer the question using a single word or phrase.")[0]
         conv.append_message(conv.roles[0], f"<image>\n")
-        conv.append_message(conv.roles[1], f"{ques} Answer the question using a single word or phrase. short answer:")
+        conv.append_message(conv.roles[1], f"{ques} Answer the question using a single word or phrase. answer:")
         prompt = conv.get_prompt()[:-4]
         print(prompt)
         # import pdb; pdb.set_trace()
@@ -92,7 +92,7 @@ def eval_model(args):
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, args.model_base, model_name)
 
-    questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")][:1000]
+    questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]
     questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
@@ -128,7 +128,7 @@ def eval_model(args):
         outputs = tokenizer.batch_decode(output_ids[:, input_token_len:], skip_special_tokens=True)[0]
         outputs = outputs.strip()
         # print(cur_prompt, outputs)
-        print(outputs)
+        # print(outputs)
 
         ans_id = shortuuid.uuid()
         ans_file.write(json.dumps({"question_id": idx,
