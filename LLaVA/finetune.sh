@@ -1,29 +1,28 @@
 #!/bin/bash
-deepspeed  --include localhost:0,1,2,3,4,5,6,7\
-    llava/train/train_mem.py \
-    --deepspeed PATH_TO_DEEPSPEED\
-    --model_name_or_path PATH_TO_VICUNAMODEL \
+deepspeed  llava/train/train_mem.py \
+    --deepspeed ./scripts/zero3.json \
+    --model_name_or_path /data/yingyueli/hub/MobileLLaMA-1.4B-Chat \
     --version v1 \
-    --data_path PATH_TO_DATA \
-    --image_folder PATH_TO_IMAGE_IN_DATA \
-    --vision_tower openai/clip-vit-large-patch14-336 \
-    --pretrain_mm_mlp_adapter PATH_TO_MM_ADAPTER \
-    --pretrain_dino_mm_mlp_adapter PATH_TO_DINO_ADAPTER \
+    --data_path playground/data/llava_v1_5_mix665k.json \
+    --image_folder ./playground/data \
+    --vision_tower /data/yingyueli/hub/clip-vit-large-patch14-336 \
+    --pretrain_mm_mlp_adapter checkpoints/llava-MobileLLaMA-1.4B-Chat-mmvp-pretrain/mm_projector.bin \
+    --pretrain_dino_mm_mlp_adapter checkpoints/llava-MobileLLaMA-1.4B-Chat-mmvp-pretrain/dino_mm_projector.bin \
     --mm_projector_type mlp2x_gelu \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
     --image_aspect_ratio pad \
     --bf16 True \
-    --output_dir PATH_TO_OUTPUT_DIRECTORY \
+    --output_dir llava-MobileLLaMA-1.4B-Chat-mmvp \
     --num_train_epochs 1 \
-    --per_device_train_batch_size 11 \
+    --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 2 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 50000 \
-    --save_total_limit 1 \
+    --save_steps 1000 \
+    --save_total_limit 10 \
     --learning_rate 2e-5 \
     --weight_decay 0. \
     --warmup_ratio 0.03 \
